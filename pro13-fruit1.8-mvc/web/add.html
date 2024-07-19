@@ -10,7 +10,7 @@
 <div id="div_container">
     <div id="div_fruit_list">
         <p class="center f32">添加库存记录</p>
-        <form th:object="${fruit}" th:action="@{/fruit.do}" method="post">
+        <form action="/atguigu/fruit.do" method="post">
             <input type="hidden" name="operate" value="add"/>
             <table id="tbl_fruit">
                 <tr>
