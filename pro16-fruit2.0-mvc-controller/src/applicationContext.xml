@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans>
+<!-- 这个bean标签的作用是 将来servletPath中涉及的名字是fruit, 那么就要找 FruitController 来处理   -->
+    <bean id="fruit" class="com.atguigu.fruit.controllers.FruitController"/>
+</beans>
