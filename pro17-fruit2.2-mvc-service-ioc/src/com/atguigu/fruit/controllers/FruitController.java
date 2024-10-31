@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
-public class FruitController extends ViewBaseServlet {
+public class FruitController {
     //The init method of ViewBaseServlet always be called cause FruitServlet is a Servlet before we modify it.
     private final FruitDAO fruitDAO = new FruitDAOImpl();
 
