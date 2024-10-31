@@ -44,7 +44,7 @@ public class FruitServlet extends ViewBaseServlet {
                 }
             }
         }
-        throw new RuntimeException("operate值非法!");
+        throw new RuntimeException("Method not found: " + operate);
     }
 
     private void update(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
