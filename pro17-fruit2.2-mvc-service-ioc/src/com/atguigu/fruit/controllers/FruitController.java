@@ -1,9 +1,8 @@
 package com.atguigu.fruit.controllers;
 
-import com.atguigu.fruit.dao.FruitDAO;
-import com.atguigu.fruit.dao.impl.FruitDAOImpl;
+import com.atguigu.fruit.service.FruitService;
+import com.atguigu.fruit.service.impl.FruitServiceImpl;
 import com.atguigu.fruit.pojo.Fruit;
-import com.atguigu.myssm.myspringmvc.ViewBaseServlet;
 import com.atguigu.myssm.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,11 +11,11 @@ import java.util.List;
 
 public class FruitController {
     //The init method of ViewBaseServlet always be called cause FruitServlet is a Servlet before we modify it.
-    private final FruitDAO fruitDAO = new FruitDAOImpl();
+    private final FruitService fruitService = new FruitServiceImpl();
 
     private String update(Integer fid, String fname, Integer price, Integer fcount, String remark) {
         // 3. 执行更新
-        fruitDAO.updateFruit(new Fruit(fid, fname, price, fcount, remark));
+        fruitService.updateFruit(new Fruit(fid, fname, price, fcount, remark));
 
         // 4. 资源跳转
         return "redirect:fruit.do";
@@ -24,7 +23,7 @@ public class FruitController {
 
     private String edit(Integer fid, HttpServletRequest req) {
         if (fid != null) {
-            Fruit fruit = fruitDAO.getFruitByFid(fid);
+            Fruit fruit = fruitService.getFruitByFid(fid);
             req.setAttribute("fruit", fruit);
             return "edit";
         }
@@ -55,14 +54,11 @@ public class FruitController {
 
         }
 
-        FruitDAO fruitDAO = new FruitDAOImpl();
-        List<Fruit> fruitList = fruitDAO.getFruitList(keyword, pageNo);
+        List<Fruit> fruitList = fruitService.getFruitList(keyword, pageNo);
         session.setAttribute("fruitList", fruitList);
 
-        //总记录条数
-        int fruitCount = fruitDAO.getFruitCount(keyword);
         //总页数
-        int pageCount = (fruitCount + 5 - 1) / 5;
+        int pageCount = fruitService.getPageCount(keyword);
 
         session.setAttribute("pageCount", pageCount);
         return "index";
@@ -74,13 +70,13 @@ public class FruitController {
 
     private String add(String fname, Integer price, Integer fcount, String remark) {
         Fruit fruit = new Fruit(0, fname, price, fcount, remark);
-        fruitDAO.addFruit(fruit);
+        fruitService.addFruit(fruit);
         return "redirect:fruit.do";
     }
 
     private String del(Integer fid) {
         if (fid != null) {
-            fruitDAO.delFruit(fid);
+            fruitService.delFruit(fid);
             return "redirect:fruit.do";
         }
         return "error";
