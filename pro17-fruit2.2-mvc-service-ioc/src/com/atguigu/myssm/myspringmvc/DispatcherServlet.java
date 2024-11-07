@@ -1,26 +1,17 @@
 package com.atguigu.myssm.myspringmvc;
 
+import com.atguigu.myssm.io.BeanFactory;
+import com.atguigu.myssm.io.impl.ClassPathXmlApplicationContext;
 import com.atguigu.myssm.util.StringUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The key functionality provided by this class is two:
@@ -34,7 +25,7 @@ import java.util.Map;
 
 @WebServlet("*.do")
 public class DispatcherServlet extends ViewBaseServlet {
-    private final Map<String, Object> beanMap = new HashMap<>();
+    private BeanFactory beanFactory = null;
 
     public DispatcherServlet() {
     }
@@ -42,30 +33,7 @@ public class DispatcherServlet extends ViewBaseServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("applicationContext.xml");
-        //1. create DocumentBuilderFactory instance
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        try {
-            //2. create DocumentBuilder instance
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            //3. create Document instance
-            Document document = documentBuilder.parse(inputStream);
-            //4. get all nodes of tag id of "bean"
-            NodeList beanNodeList = document.getElementsByTagName("bean");
-            for (int i = 0; i < beanNodeList.getLength(); i++) {
-                Node beanNode = beanNodeList.item(i);
-                if (beanNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element beanElement = (Element) beanNode;
-                    String beanId = beanElement.getAttribute("id");
-                    String className = beanElement.getAttribute("class");
-                    Class<?> beanClass = Class.forName(className);
-                    Object beanObj = beanClass.getDeclaredConstructor().newInstance();
-                    beanMap.put(beanId, beanObj);
-                }
-            }
-        } catch (ParserConfigurationException | ClassNotFoundException | IOException | SAXException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+        beanFactory = new ClassPathXmlApplicationContext();
     }
 
     @Override
@@ -82,8 +50,8 @@ public class DispatcherServlet extends ViewBaseServlet {
         int lastDotIndex = servletPath.lastIndexOf(".do");
         servletPath = servletPath.substring(0, lastDotIndex);
 
-        Object controllerBeanObj = beanMap.get(servletPath);
-        if (controllerBeanObj == null) {
+        Object beanObj = beanFactory.getBean(servletPath);
+        if (beanObj == null) {
             System.out.println("servletPath not found: " + servletPath);
             throw new RuntimeException("illegal servlet path!");
         }
@@ -94,7 +62,7 @@ public class DispatcherServlet extends ViewBaseServlet {
         }
 
         try {
-            Method[] methods = controllerBeanObj.getClass().getDeclaredMethods();
+            Method[] methods = beanObj.getClass().getDeclaredMethods();
             for (Method method : methods) {
                 if (operate.equals(method.getName())) {
                     // 1. 统一获取请求参数
@@ -126,7 +94,7 @@ public class DispatcherServlet extends ViewBaseServlet {
 
                     // 2. invoke method of controllers
                     method.setAccessible(true);
-                    Object returnObj = method.invoke(controllerBeanObj, parameterValues);
+                    Object returnObj = method.invoke(beanObj, parameterValues);
                     // 3. process view
                     String methodReturnStr = (String) returnObj;
                     if (methodReturnStr.startsWith("redirect:")) {

@@ -1,8 +1,7 @@
 package com.atguigu.fruit.controllers;
 
-import com.atguigu.fruit.service.FruitService;
-import com.atguigu.fruit.service.impl.FruitServiceImpl;
 import com.atguigu.fruit.pojo.Fruit;
+import com.atguigu.fruit.service.FruitService;
 import com.atguigu.myssm.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,7 +10,7 @@ import java.util.List;
 
 public class FruitController {
     //The init method of ViewBaseServlet always be called cause FruitServlet is a Servlet before we modify it.
-    private final FruitService fruitService = new FruitServiceImpl();
+    private final FruitService fruitService = null;
 
     private String update(Integer fid, String fname, Integer price, Integer fcount, String remark) {
         // 3. 执行更新

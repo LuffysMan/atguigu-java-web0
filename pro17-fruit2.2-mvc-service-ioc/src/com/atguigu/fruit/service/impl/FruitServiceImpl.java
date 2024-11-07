@@ -1,14 +1,13 @@
 package com.atguigu.fruit.service.impl;
 
-import com.atguigu.fruit.service.FruitService;
 import com.atguigu.fruit.dao.FruitDAO;
-import com.atguigu.fruit.dao.impl.FruitDAOImpl;
 import com.atguigu.fruit.pojo.Fruit;
+import com.atguigu.fruit.service.FruitService;
 
 import java.util.List;
 
 public class FruitServiceImpl implements FruitService {
-    private final FruitDAO fruitDAO = new FruitDAOImpl();
+    private final FruitDAO fruitDAO = null;
 
     @Override
     public void addFruit(Fruit fruit) {
