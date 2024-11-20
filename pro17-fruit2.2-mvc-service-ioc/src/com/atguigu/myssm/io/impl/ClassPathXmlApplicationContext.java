@@ -1,6 +1,6 @@
-package com.atguigu.myssm.io.impl;
+package com.atguigu.myssm.ioc.impl;
 
-import com.atguigu.myssm.io.BeanFactory;
+import com.atguigu.myssm.ioc.BeanFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
