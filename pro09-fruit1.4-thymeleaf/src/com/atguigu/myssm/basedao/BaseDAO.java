@@ -1,13 +1,10 @@
 package com.atguigu.myssm.basedao;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,58 +47,70 @@ public abstract class BaseDAO<T> {
         return connection;
     }
 
-    public void save(T entity) {
-        String query = "INSERT INTO " + getTableName(entity) + " VALUES " + getInsertValues(entity);
-
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            setStatementParameters(statement, entity, "insert");
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void setParams(PreparedStatement psmt, Object... params) throws SQLException {
+        int idx = 1;
+        for (Object obj : params) {
+            if (obj.getClass() == Integer.class) {
+                psmt.setInt(idx, (Integer) obj);
+            } else if (obj.getClass() == String.class) {
+                psmt.setString(idx, (String) obj);
+            } else if (obj.getClass() == Long.class) {
+                psmt.setLong(idx, (Long) obj);
+            } else if (obj.getClass() == Float.class) {
+                psmt.setFloat(idx, (Float) obj);
+            } else if (obj.getClass() == Double.class) {
+                psmt.setDouble(idx, (Double) obj);
+            }
+            idx += 1;
         }
     }
 
-    public void update(T entity) {
-        String query = "UPDATE " + getTableName(entity) + " SET " + getUpdateColumns(entity) + " WHERE id = ?";
-
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            setStatementParameters(statement, entity, "update");
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void delete(int id) {
-        String query = "DELETE FROM " + getTableName(null) + " WHERE id = ?";
-
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, id);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public List<T> executeQuery(String query) {
+    public List<T> executeQuery(String sql, Object... params) {
         List<T> resultList = new ArrayList<>();
 
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery()) {
-            while (resultSet.next()) {
-                T entity = resultSetToEntity(resultSet);
+        try {
+            Connection connection = getConnection();
+            PreparedStatement psmt = connection.prepareStatement(sql);
+            setParams(psmt, params);
+            ResultSet rs = psmt.executeQuery();
+            while (rs.next()) {
+                T entity = resultSetToEntity(rs);
                 resultList.add(entity);
             }
-        } catch (SQLException | InstantiationException | IllegalAccessException e) {
+        } catch (SQLException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
         }
 
         return resultList;
     }
+
+    protected Object[] executeComplexQuery(String query, Object... params) {
+        try {
+            Connection conn = getConnection();
+            PreparedStatement psmt = conn.prepareStatement(query);
+            setParams(psmt, params);
+            ResultSet rs = psmt.executeQuery();
+            //通过resultset可以获取结果集的元数据
+            //元数据: 描述结果集数据的数据, 简单讲, 就是这个结果集有哪些列, 什么类型等
+            ResultSetMetaData rsmd = rs.getMetaData();
+            //获取结果集的列数
+            int columnCount = rsmd.getColumnCount();
+            Object[] columnValueArr = new Object[columnCount];
+            // 6. 解析rs
+            if (rs.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    Object columnValue = rs.getObject(i + 1);
+                    columnValueArr[i] = columnValue;
+                }
+                return columnValueArr;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 
     public void close() {
         try {
@@ -113,38 +122,24 @@ public abstract class BaseDAO<T> {
         }
     }
 
-    private T resultSetToEntity(ResultSet resultSet) throws SQLException, InstantiationException, IllegalAccessException {
-        T entity = entityClass.newInstance();
-        for (Field field : entityClass.getDeclaredFields()) {
-            field.setAccessible(true);
-            String fieldName = field.getName();
-
-            if (fieldName.equals("fid")) {
-                field.set(entity, resultSet.getInt(fieldName));
-            } else if (fieldName.equals("fname") || fieldName.equals("remark")) {
-                field.set(entity, resultSet.getString(fieldName));
-            } else if (fieldName.equals("price") || fieldName.equals("fcount")) {
-                field.set(entity, resultSet.getInt(fieldName));
+    private void setValue(T entity, String columnName, Object columnValue) throws IllegalAccessException, NoSuchFieldException {
+        for (Field field :
+                entityClass.getDeclaredFields()) {
+            if (columnName.equals(field.getName())) {
+                field.setAccessible(true);
+                field.set(entity, columnValue);
             }
         }
+    }
+
+    private T resultSetToEntity(ResultSet resultSet) throws SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        T entity = entityClass.getDeclaredConstructor().newInstance();
+        for (Field field : entityClass.getDeclaredFields()) {
+            field.setAccessible(true);
+            // 从 resultSet 中获取字段值
+            Object value = resultSet.getObject(field.getName());
+            field.set(entity, value);
+        }
         return entity;
-    }
-
-    private String getTableName(T entity) {
-        // 根据实体对象类型T返回表名，请根据实际情况进行实现
-        return "";
-    }
-
-    private String getInsertValues(T entity) {
-        // 根据实体对象类型T返回插入语句的值部分，请根据实际情况进行实现
-        return "";
-    }
-
-    private String getUpdateColumns(T entity) {
-        // 根据实体对象类型T返回更新语句的列部分，请根据实际情况进行实现
-        return "";
-    }
-
-    private void setStatementParameters(PreparedStatement statement, T entity, String operation) throws SQLException {
     }
 }
