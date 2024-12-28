@@ -1,0 +1,64 @@
+.h656 {
+    height:56;
+}
+
+
+.h64 {
+    height:64;
+}
+
+
+.img18 {
+    width: 18;
+    height: 20;
+}
+
+
+.img48 {
+    width: 35;
+    height: 40;
+}
+
+.img56 {
+    width: 40;
+    height: 50;
+}
+
+#div_topic_info{
+    width: 60%;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding-bottom: 32px;
+    border: 1px solid black;
+}
+
+.tbl_reply_info {
+    width: 60%;
+    margin-top: 8px;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding-bottom: 32px;
+    border: 1px solid red;
+}
+
+#div_add_reply {
+    width: 60%;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding-bottom: 32px;
+    border: 1px solid black;
+}
+
+#div_add_reply input[type=text] {
+    width: 98%;
+    border: 0px dotted gray;
+}
+
+#div_add_reply textarea {
+    width: 98%;
+}
+
+.reply_title {
+    display: flex;
+    align-items: center; /* 垂直居中对齐 */
+}

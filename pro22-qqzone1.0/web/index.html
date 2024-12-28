@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QQZone</title>
+    <link rel="stylesheet" type="text/css" th:href="@{css/common.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{css/index.css}">
+</head>
+<body>
+<div id="div_top">
+    <iframe th:src="@{/page.do?operate=page&page=frames/top}" height="118px" width="100%" frameborder="no"></iframe>
+</div>
+<div id="div_content">
+    &nbsp;
+    <div id="div_left">
+        <iframe th:src="@{/page.do?operate=page&page=frames/left}" width="100%"></iframe>
+    </div>
+    <div id="div_main">
+        <iframe th:src="@{/page.do?operate=page&page=frames/main}" width="100%" height="400px"></iframe>
+    </div>
+</div>
+<div id="div_bottom">
+    <p class="center"> 版权所有, 欢迎盗版</p>
+</div>
+</body>
+</html>

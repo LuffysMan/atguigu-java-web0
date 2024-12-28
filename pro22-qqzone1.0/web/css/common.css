@@ -1,0 +1,22 @@
+body{
+    margin: 0
+}
+
+.container-row {
+    display: flex;
+    flex-direction: row;
+}
+
+
+.container-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.right8 {
+    text-align: right
+}
+
+.left {
+}

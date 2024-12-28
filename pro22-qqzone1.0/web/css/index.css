@@ -1,0 +1,37 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+#div_top {
+    width: 100%;
+    height: 15%;
+    background-color: pink;
+    text-align: center;
+    font-size: 24px;
+}
+
+#div_content{
+    display: flex;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#div_left {
+    width: 20%;
+    background-color: green;
+}
+
+#div_main {
+    width: 80%;
+}
+
+#div_bottom {
+    width: 100%;
+    height: 10%;
+    bottom: 0;
+    position: fixed;
+    background-color: #ffcccb;
+    text-align: center;
+}

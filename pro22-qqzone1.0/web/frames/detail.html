@@ -1,0 +1,96 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" th:href="@{css/common.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{css/detail.css}">
+    <script th:src="@{js/detail.js}" defer></script>
+</head>
+<body>
+<div id="div_topic_detail">
+    <div>
+        <a th:href="@{|/user.do?operate=friend&id=${session.friend.id}|}" target="_top" class="right8">返回日志列表</a>
+    </div>
+    <div id="div_topic_info">
+        <!-- topic自身信息       -->
+        <table id="tbl_topic_info">
+            <tr>
+                <td rowspan="2" class="w14 h96">
+                    <div class="h64 center">
+                        <img th:src="@{|/images/${session.topic.author.headImg}|}" class="img56">
+                    </div>
+                    <div th:text="${session.topic.author.nickName}" class="h32 center" style="">乔峰</div>
+                </td>
+                <td class="topic_title" onmouseover="showImg('img01')" onmouseout="hideImg('img01')">
+                    <img id="img01"
+                         th:if="${session.userBasic.id==session.friend.id}"
+                         style="float: right; margin-top:2px;margin-right:2px;display:none;width:24px; height:24px;"
+                         th:src="@{images/del.png}"/>
+                    <span th:text="${session.topic.title}">《萧某今天就和天下群雄决一死战, 你们一起上吧 !》</span>
+                    <span th:text="${session.topic.topicDate}">2024-11-11 00:33:43</span>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+    <div id="div_reply_list">
+        <table class="tbl_reply_info" th:each="reply: ${session.topic.replyList}">
+            <tr>
+                <td rowspan="2" class="w14 h88">
+                    <div class="h56 center">
+                        <img class="img48" th:src="@{|images/${reply.author.headImg}|}"/>
+                    </div>
+                    <div class="h32 center" th:text="${reply.author.nickName}">段誉</div>
+                </td>
+                <td class="reply_title" th:onmouseover="|showImg('img_${reply.id}')|" th:onmouseout="|hideImg('img_${reply.id}')|">
+                    <span th:text="|回复: ${session.topic.title}|">回复: 萧某今天就和天下英雄决一死战, 你们一起上吧!</span>
+                    <span class="title_date_right" th:text="${reply.replyDate}">2020-11-11 11:11:11</span>
+                    <!-- 出现这个删除小图标的条件:
+                        1. 在我自己的空间(那当然我对自己空间有全部的操作权限)
+                        2. 当前回复的作者就是我(那我可以删除自己的回复)
+                    -->
+                    <img th:id="|img_${reply.id}|" th:src="@{images/del.png}" class="img18"
+                         th:if="${session.userBasic.id==session.friend.id || session.userBasic.id==reply.author.id}"
+                         th:onclick="|delReply(${reply.id}, ${session.topic.id})|"
+                         style="float: right; margin-top:2px;margin-right:2px;display:none;width:24px; height:24px;"/>
+
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span th:text="${reply.content}">你可曾见过边关之上, 宋辽相互仇杀的惨状? 可曾见过宋人辽人妻离子散, 家破人亡?</span>
+                    <span th:if="${reply.hostReply!=null}"
+                          th:text="${reply.hostReply.content}">你以为我是慕容复的人, 所以和我比试?</span>
+                    <span th:if="${reply.hostReply!=null}">(bug)2020-11-11 11:11:11</span>
+                    <a th:id="|a${reply.id}|" th:unless="${reply.hostReply!=null}" href="#">主人回复</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="div_add_reply">
+        <p>添加回复</p>
+        <form action="reply.do" method="post">
+            <input type="hidden" name="operate" th:value="addReply"/>
+            <input type="hidden" name="topicId" th:value="${session.topic.id}"/>
+            <table>
+                <tr>
+                    <th>回复日志:</th>
+                    <td>
+                        <input type="text" th:value="|《${session.topic.title}》|"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>回复内容:</th>
+                    <td><textarea name="content" rows="3"></textarea></td>
+                </tr>
+                <tr>
+                    <th colspan="2">
+                        <input type="submit" value=" 回 复 ">
+                        <input type="submit" value=" 重 置 ">
+                    </th>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+</body>
+</html>
